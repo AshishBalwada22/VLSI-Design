@@ -1,0 +1,45 @@
+Harware decription language (HDL)
+- HDL is not another programming language
+- Hardware construct that are all scattered around chip and execute in parallel
+- textual representation of hardware construct
+- all statement are executed in parallel
+- code ordering is flexible, c=a+b; a=1; b=2
+- execution of code is triggered by events
+- sensitivity lists are used to define when a code section is executed
+- different simulator may yield different results, coding style is required
+
+---------------------------------------------------------------------------------------------
+
+Abstraction levels
+1) three coding style
+ - structural code(GTL/gate level), netlist) 
+ - RTL(register transfer level)
+ - Behavioural(testbench)
+2) DUT(device under test)
+ - represent hardware
+ - usually RTL or GTL
+3) Testbench
+ - represent system
+ - usually behavioural
+ - using high order language 
+
+-----------------------------------------------------------------------------------------
+Basic construct
+
+1) Primitives : not,and, or   or(out,in1,in2);
+2) signals
+4 states : 0(ground voltage), 1(vdd voltage),x(error),z(high impedence state)
+wires : do not keep states
+registers : keep states (i.e output)
+can represent buses or group of signal 
+
+wire in1,in2;
+reg out;
+wire [7:0] data;
+reg [31:0] mem [0:7]; width(bits) = 32, depth(words) = 8    8*32
+
+3) operator 
+&,|,~,&&,||   out = in1 | in2;
+4) constants -> format is W'Bval (width, apostrophe,type,val)
+1'b0 => 0 , b is binary
+4'b0011 => 3
