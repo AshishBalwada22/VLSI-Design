@@ -43,3 +43,128 @@ reg [31:0] mem [0:7]; width(bits) = 32, depth(words) = 8    8*32
 4) constants -> format is W'Bval (width, apostrophe,type,val)
 1'b0 => 0 , b is binary
 4'b0011 => 3
+
+----------------------------------------------------------------------------------------
+
+Procedural blocks
+- behavioural high level of verilog
+
+Initial block
+- will be executed only once, at first time the unit is called(only in testbench)
+- we are going to do something at the beginning of simulation
+
+intial begin
+a=1'b0;
+b=1'b0;
+end
+
+always block
+- statement will be evaluated when a change in sensitivity lists occur
+- sensitivity list, list of signal which causes whatever inside a block of code to be evaluated)
+
+sync reset rising edge triggered flop
+always @(posedge clock)
+   if(!nreset)
+      q <= 1'b0;
+   else
+      q <= d;
+
+async reset rising edge triggered, load enable flop
+always @(posedge clock or negedge nreset)
+    if(!nreset)
+       q <= 1'b0;
+    else if(load_enable)
+       q <= d;
+
+-----------------------------------------------------------------------------------------
+There are two type of always block -
+1) Sequential 
+- asserted by a clock in the sensitivity list
+- translate into flip flop and latches
+
+always @(posedge clock or negedge nreset)
+   if(!nreset)
+     q <= 1'b0;
+   else if(load_enable)
+     q <= d;
+
+2) Combinational 
+- describe purely combinational logic and therefore the sensitivity list has (non-clock) signals
+- the verilog 2001 standard allows using * instead of a sensitivity list to reduce bugs.
+
+always @(a or b or c)
+  out = a & b & c;
+
+always @(*)
+  out = a & b & c;
+
+-------------------------------------------------------------------------------------------
+
+Assignments
+3 types of assignment
+
+1) continous assignment
+- outside of always block
+
+assign muxdut = sel ? in1 : in0;
+
+2) blocking procedural assignment "="
+- rhs is executed and assignment is completed before the next statement is executed
+
+// assume initially a=1
+a=2;
+b=a;
+output =>  a=2, b=2
+
+3) non-blocking procedural assignment "<="
+- rhs is executed and assignment takes place at the end of current time step
+
+// assume initially a=1
+a=2;
+b=a;
+output => a=2, b=1
+
+Rules
+- combinational always block - use blocking assignment "="
+- sequential always block - use non-blocking assignment "<="
+- don't mix blocking and non-blocking in the same always block
+- don't assign to the same variable from more than one always block
+
+------------------------------------------------------------------------------------------
+
+Hierarchy
+
+Modules -
+used to define a hardware block
+
+Module mux4(out,in,sel);
+  input [3:0] in;
+  input [1:0] sel;
+  output out;
+  reg out;
+  always @(*)
+   case(sel)
+      2'b00 : out = in[0];
+      2'b01 : out = in[1];
+      2'b10 : out = in[2];
+      2'b11 : out = in[3];
+      default : out = 4'bx;
+   endcase
+endmodule
+
+Instance -
+referencing a block at a different level
+
+mux4 m0(.out(outa), .in(a), .sel(sel));
+
+-------------------------------------------------------------------------------------------
+
+System Tasks
+- system tasks are used to provide interface to simulation data
+- identified by a $name syntax
+
+printing tasks
+$display - print once the statement is executed
+$display("at %t, value of out is %b\n", $time, out); 
+
+-------------------------------------------------------------------------------------------
