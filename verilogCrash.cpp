@@ -130,3 +130,241 @@ keyword - reg , default value - x
 - continously driven i.e cannot be used to store the value
 keyword - wire, default value - z
 - net represent a class of data type such as wire, wand etc
+
+-------------------------------------------------------------------------------------
+
+values and signal strength
+- verilog supports 4 value levels to model the functionality of real hardware
+value level - 0,1,x(unknown),z(high impedance) 
+
+--------------------------------------------------------------------------------------
+port assignment
+input - externally reg or net, internally net
+output - internally reg or net, externally net
+
+-----------------------------------------------------------------------------------------
+net data type
+always use net data type as continous driven
+
+module half_adder(a,b,sum,carry);
+input a,b;
+output sum,carry;
+wire sum,carry;
+
+assign sum=a^b;
+assign carry=a&b;
+endmodule
+
+- assign keyword, always use net data type or wire
+
+module use_of_wire(y,a,b,c,d);
+input a,b,c,d;
+output y;
+wand y; // this should be wand, not wire
+assign y=a&b;
+assign y=c|d;
+endmodule
+
+------------------------------------------------------------------------
+number
+<size> '<base><number>
+1'b1 -> 1
+8'h21 -> 0010 0001
+0, x, z extension
+4'bx0 -> xxx0
+5'd1 -> 0001
+
+------------------------------------------------------------------------------------
+register data type
+1) reg(most widely used)
+2) integer(used for loop counting)
+3) real(floating point number)
+4) time(keep track of simulation time)
+
+reg count; // single bit register variable
+reg[7:0] bus; // 8-bit bus
+
+reg reset;
+initial
+begin
+reset=1'b0;
+#10 reset =1'b1;
+#10 reset =1'b0;
+end
+
+integer data type
+-keyword - integer, counting purpose
+- synthesizable in nature, default value is x
+- default width is 32 bits
+i.e 
+integer count, new_num;
+intital begin
+count=1;
+new_num=-2;
+end
+
+real data type
+-stores floating point numbers
+- keyword - real, not synthesizable, default value is 0.0
+- rounded off to the nearest integer when it is assigned to an integer
+i.e 
+integer a;
+real b;
+initial begin
+b=-6.5
+a=b;
+end
+// a will be assigned value -7
+
+time data type
+- used to store the simulation time
+- keyword - time
+- time variable are unassigned in nature
+- width is implementation specific but is atleast 64 bits
+- not synthesizable(useful for testbench)
+- default value is x
+
+i.e 
+time new_sim_time;
+initial begin
+new_sim_time = $time; // save the current simulation time
+end
+
+---------------------------------------------------------------------------------
+vectors, arrays, memories, parameter, strings
+
+vector
+- nets or reg data type can be declared as vectors(multiple bit widths)
+- vector represent buses
+i.e 
+wire x,y,z; // single bit variable
+wire[15:0] data; // 16-bit data , [msb:lsb]
+wire [0:31] sum; // 32 bit data
+
+arrays
+- reg, integer, time, real, vector register data type
+i.e
+reg [7:0] register_bank[15:0]; // 16 8-bit register
+reg num [31:0]; // array of size 32 one bit numbers
+
+memories
+- memories are modeled as a one-dimensional array of registers
+i.e reg mem_1bit [0:1023];
+
+parameter
+- parameter cannot be used as varibles, it is a constant value
+- parameter value for each module instance can be overriden individually at compile time
+- this allows the module instance to be customized
+
+strings
+- string can be stored in reg
+i.e reg[8*10:1] string_value; // declaration
+string_value = "VLSI";
+// each string character takes up 8 bits(1 byte)
+
+---------------------------------------------------------------------------------------
+operator in verilog
+
+1) arithmetic operator
+- unary(one operand) -> +,-
+- binary (two operand)
+
+a=4'b001x, b=4'b1011;
+output = a+b = 4'bx
+// below depends upon first bit
+-7%2 => -1;
+7%-2 => 1;
+
+2) logical operator (!,&&,||)
+3) bitwise operator (&,|,~,^,~^ or ^~)
+4) equality operator
+- logical -> doesn't include x & z, result -> 0,1,x
+-- logical equality(==) and logical inequality(!=)
+- case -> include x & z, all bit including x and z should be match then result -> 0,1 
+5) relation operator (>,<,>=,<=)
+6) reduction operator (&,|,~&(nand),~|(nor),^(xor),~^ or ^~(xnor))
+- takes 1 operand only
+- output -> single bit
+
+i.e x=4'b1010
+&x -> 1&0&1&0 => 1'b0
+
+7) shift operator
+- right shift(>>), left shift(<<)
+when the bits are shifted then vacant bit positions are filled with zeros
+- arithmetic left shift(<<<), arithmetic right shift(>>>)
+the context of the expression to determine the value with which to fill the vacanted bits, depends upon first bit(msb)
+
+8) concatenation({})
+- provides a mechanism to append multiple operands
+- operands must be sized
+i.e 
+x=2'b00, y=2'b10
+z={x,y} // 4'b0010
+z = {x,2{y}} // replication operator, 2{y} = yy , replicate y 2 times
+
+9) conditional operator
+condition_expr ? true_expr : false_expr;
+
+-----------------------------------------------------------------------------------------
+practice question
+1) y=1101
+a = y>>1'b1;
+b = y>>>1'b1;
+find a&b?
+a = 1101 -> 0110
+b = 1101 -> 1110
+a&b = 0110
+
+2) m = 2'b10 , n = 2'b1x;
+assign q=(m<n)? 2'b10 : 2'b11;
+ans = 2'bxx
+3) a = 4'b0011
+   b = 4'b0001
+   c = 4'b0100 (a+b)
+   
+------------------------------------------------------------------------------------------
+gate level modeling
+gate primitives
+- verilog has predefined inbuilt gate primitives
+- all logic gate can be implemented using these gates
+
+1) basic gate(and/or, buf/not)
+i.e 
+primitive_name instance_name(o,in1,in2);
+or(o,in1,in2);
+
+Buf/Not gates - > same ouput as input
+
+2) Bufif/ Notif gates
+- these gates have a additional control signal
+- they propogate if the control signal is given otherwise the output will be in high impedence state
+i.e bufif1, bufif0, notif1, notif0
+
+----------------------------------------------------------------------------
+gate delays
+- in verilog, we can introduce gate delay in the logic circuits
+- three types of delay from input to output of gates
+1) rise delay
+- these delays come into picture when the output of the gate transist from another value to logic 1
+2) fall delay
+- when gate output transist from another value to logic 0
+3) turn off delay
+- when gate output transist from any other logic value to high impedance(z)
+
+note - if the gate output transist to don't care(x) then minimum of three delays is considered
+
+syntax
+1) for all transition
+gate_name #(delay_time) a1(output,inputs)
+
+2) for rise and fall delay specification
+gate_name #(rise_val,fall_val) a1(output,inputs)
+
+3) for rise fall and turnoff delay specification
+gate_name #(rise_val,fall_val,turnoff_value) a1(output,inputs)
+
+-------------------------------------------------------------------------------------------
+dataflow modeling
+continous assignment
+continous assignment is used to drive a value onto a net.
