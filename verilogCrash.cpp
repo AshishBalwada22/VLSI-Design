@@ -367,4 +367,154 @@ gate_name #(rise_val,fall_val,turnoff_value) a1(output,inputs)
 -------------------------------------------------------------------------------------------
 dataflow modeling
 continous assignment
-continous assignment is used to drive a value onto a net.
+- continous assignment is used to drive a value onto a net.
+- a continous assignment replaces gates in the description of the circuit and describes the circuit at a higher level of abstraction
+- continous assignment statements starts with the keyword assign
+characterstics
+- the left hand side of an assignment must always be a net type. right hand side can be reg or net type
+- continous assignment are always active
+- delay value can be specified for assignments in terms of time units
+
+Implicit continous assignment
+- continous assignment can be placed on a net when it is declared
+- there can be only one implicit declaration assignment per net because a net is declared only once
+
+regular continous assignment
+wire out;
+assign out = in1&in2;
+implicit continous assignment
+wire out = in1&in2;
+
+-----------------------------------------------------------------------------------------
+Delays
+- delays value control the time between the change in rhs operand and when the new value is assigned to the lhs
+1) regular assignment delay
+2) implicit continous assignment delay
+3) net declaration delay
+
+1) regular assignment delay
+- delay value is specified after the keyword assign
+- any change in value of in1 and in2 will result in a delay of 10 time unit before recomputation of the expression in1 and in2 and the result will be assigned to out
+i.e assign #10 out = in1&in2;
+
+2) implicit continous assignment delay
+- specify both a delay and an assignment on the net
+wire #10 o =in1&in2;
+
+3) net declaration delay
+- delay can be specified on a net when it is declared without putting continous assignment on the net
+wire #10 out;
+assign out=in1&in2;
+
+------------------------------------------------------------------------------------------
+behavioral modeling
+1) structured procedures(initial and always block)
+2) procedural assignment (blocking and non-blocking)
+3) delay in procedural assignment
+4) block statement(begin-end / fork-join)
+5) conditional and multiway branching statements
+6) looping constructs(while,for,repeat,forever)
+7) some examples
+
+1) structured procedure
+- all behavioral statement are written inside initial and always block
+- these blocks run in parallel i.e concurrent in nature
+- their activity starts at 0 simulation time
+- block cannot be nested
+
+initial statement
+- once executable only
+- execution starts at 0 simulation time
+- parallel execution in case of multiple initial blocks
+- needs begin and end if we have multiple statement in initial block
+
+always statement
+- repeat continously throughout the duration of simulation time
+- concurrent in nature and starts at 0 simulation time
+- parallel execution in case of multiple always blocks
+- a deadlock execution condition will be created if an always construct has no control for simulation time
+
+2) procedural assignment
+
+blocking assignments
+- represent with "="
+- statements are executed sequentially
+- statements are executed in the order they are specified in a sequential block
+- delay values will be added
+- blocking assignment can be used in both procedural and continous assignments
+
+non-blocking assignment
+- represented with sign "<="
+- statements are executed concurrently
+- rhs are evaluated first, subsequently the specified assignment are scheduled
+- non-blocking assignment can't be used in a continous assignment statement or in a net declaration
+
+3) delay in procedural assignment
+- delay-based timing control in an expression specifies the time duration when the statement is encountered and when it is executed
+
+regular delay
+- if delay is specified then at that time the entire statement is executed and assigned to the lhs
+- this is the delay before the rhs is evaluated and assigned to the lhs
+i.e #10 x=5; // value 5 is assigned to x by 10 unit delay
+
+intra-assignment delay
+- the rhs of the equation at current time but the value is assigned to lhs after the delay time
+- it can be applied to both blocking and non-blocking assignment
+i.e x=0,z=0;
+y = #5 x*z;
+
+4) block statement
+
+sequence block
+- begin-end is used to group multiple statements
+- statements are executed in the order they are mentioned
+- delay is treated relative to the simulation time and previous statement
+
+parallel block
+- fork-join is used to group multiple statements
+- statement are executed concurrently
+- delay is treated relative to the simulation time of entering the block
+i.e 
+intital fork
+statements
+join
+
+
+5) conditional and multiway branching statements
+multiway branching statements - case statements
+i.e
+case(expression)
+endcase
+
+
+6) looping constructs
+
+for loop
+i.e for(; expression ; )
+begin
+end
+
+while loop
+- non-synthesizable in nature
+i.e 
+while(expression)
+begin
+$display("count");
+end
+
+repeat loop
+- iterate fixed number of times
+i.e 
+repeat(number)
+begin
+end
+
+forever loop
+- it execute forever until $finish or disable statement is encountered
+
+i.e 
+initial
+begin
+clock = 1'b0;
+forever #10 clock=~clock;
+end
